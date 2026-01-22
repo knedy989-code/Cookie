@@ -6,151 +6,141 @@
     <title>Cookie RNG: Infinite Crumb</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0a0a0a; color: white; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        .cookie-click:active { transform: scale(0.85) rotate(5deg); }
-        .rarity-glow { filter: drop-shadow(0 0 15px currentColor); }
-        .tab-active { color: #f59e0b; border-bottom: 2px solid #f59e0b; background: rgba(245, 158, 11, 0.05); }
-        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .animate-item { animation: slideIn 0.3s ease-out forwards; }
+        body { background-color: #0d0d0d; color: white; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .cookie-shadow { filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.2)); }
+        .cookie-click:active { transform: scale(0.9); }
+        .rarity-card { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .divine-glow { box-shadow: 0 0 15px #06b6d4; border: 1px solid #06b6d4; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <div class="p-5 bg-[#111] border-b border-white/5 flex justify-between items-center shadow-lg">
+    <header class="p-6 bg-[#121212] border-b border-white/5 flex justify-between items-center">
         <div>
-            <h1 class="text-xl font-black tracking-tighter text-amber-500">COOKIE RNG</h1>
-            <div class="flex items-center gap-2">
-                <span class="text-[10px] text-gray-500 font-mono uppercase tracking-widest">Balance:</span>
-                <span id="bits-count" class="text-lg font-mono font-bold text-white">0</span>
-            </div>
+            <h1 class="text-2xl font-black text-amber-500 tracking-tighter uppercase">Infinite Crumb</h1>
+            <p class="text-xs font-mono text-gray-500">BITS: <span id="bits" class="text-white">0</span></p>
         </div>
-        <div id="luck-stat" class="bg-amber-900/30 border border-amber-500/50 px-3 py-1 rounded-lg text-[10px] font-black text-amber-400">
+        <div id="luck-tag" class="bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full text-[10px] font-bold text-amber-500">
             LUCK: 1.0x
         </div>
-    </div>
+    </header>
 
-    <main id="view-roll" class="flex-grow flex flex-col items-center justify-center p-6">
-        <div id="cookie-main" class="text-[150px] cursor-pointer select-none transition-transform cookie-click mb-12 drop-shadow-[0_0_30px_rgba(251,191,36,0.1)]">
+    <main id="tab-roll" class="flex-grow flex flex-col items-center justify-center p-8">
+        <div id="main-cookie" class="text-[120px] cursor-pointer select-none transition-transform cookie-click cookie-shadow mb-12">
             🍪
         </div>
-        <button id="btn-roll" class="w-full max-w-xs bg-gradient-to-b from-amber-500 to-amber-700 hover:from-amber-400 hover:to-amber-600 text-white font-black py-4 rounded-2xl shadow-xl transition-all active:translate-y-1">
+        
+        <button id="roll-button" class="w-full max-w-xs bg-amber-600 hover:bg-amber-500 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
             SUMMON COOKIE
         </button>
-        <p class="mt-4 text-[10px] text-gray-600 uppercase tracking-widest font-bold">Costs 0 Bits</p>
+        <p class="mt-4 text-[10px] text-gray-600 uppercase tracking-widest font-bold">Cost: 0 Bits</p>
     </main>
 
-    <main id="view-inv" class="hidden flex-grow p-6 overflow-y-auto">
-        <div class="flex justify-between items-end mb-6">
-            <h2 class="text-3xl font-black tracking-tight">STASH</h2>
-            <span id="inv-count" class="text-xs text-gray-500 font-mono">0 Items</span>
-        </div>
-        <div id="inv-list" class="grid grid-cols-1 gap-3">
+    <main id="tab-inv" class="hidden flex-grow p-6 overflow-y-auto">
+        <h2 class="text-xl font-bold mb-6 text-gray-400">YOUR STASH</h2>
+        <div id="inv-list" class="space-y-3">
             </div>
     </main>
 
-    <main id="view-shop" class="hidden flex-grow p-6">
-        <h2 class="text-3xl font-black mb-6">UPGRADES</h2>
-        <div class="space-y-4">
-            <div onclick="buyLuck()" class="bg-[#1a1a1a] p-5 rounded-2xl border border-white/5 flex justify-between items-center active:bg-zinc-800">
-                <div>
-                    <h3 class="font-bold">Magic Flour</h3>
-                    <p class="text-xs text-gray-500">Increases Luck by +0.5x</p>
-                </div>
-                <button id="luck-cost" class="bg-amber-600 px-4 py-2 rounded-lg font-bold text-xs">50 Bits</button>
+    <main id="tab-shop" class="hidden flex-grow p-6">
+        <h2 class="text-xl font-bold mb-6 text-gray-400">UPGRADES</h2>
+        <div onclick="buyUpgrade()" class="bg-[#181818] p-4 rounded-2xl border border-white/5 flex justify-between items-center active:bg-zinc-800">
+            <div>
+                <h3 class="font-bold text-amber-500 text-sm">Magic Oven</h3>
+                <p class="text-[10px] text-gray-500">Increases Luck by +0.5x</p>
             </div>
+            <div id="upgrade-cost" class="bg-amber-600 px-4 py-2 rounded-lg font-bold text-xs">50 BITS</div>
         </div>
     </main>
 
-    <nav class="bg-[#111] border-t border-white/5 p-2 flex">
-        <button onclick="showTab('roll')" id="nav-roll" class="flex-1 flex flex-col items-center py-2 tab-active transition-all">
-            <span class="text-lg">🎲</span>
-            <span class="text-[9px] font-bold mt-1 uppercase tracking-tighter">Roll</span>
+    <nav class="bg-[#121212] border-t border-white/5 flex p-2 shadow-2xl">
+        <button onclick="switchTab('roll')" id="nav-roll" class="flex-1 flex flex-col items-center py-2 text-amber-500">
+            <span class="text-xl">🎲</span>
+            <span class="text-[9px] font-bold uppercase mt-1">Roll</span>
         </button>
-        <button onclick="showTab('inv')" id="nav-inv" class="flex-1 flex flex-col items-center py-2 text-gray-500 transition-all">
-            <span class="text-lg">📦</span>
-            <span class="text-[9px] font-bold mt-1 uppercase tracking-tighter">Inventory</span>
+        <button onclick="switchTab('inv')" id="nav-inv" class="flex-1 flex flex-col items-center py-2 text-gray-500">
+            <span class="text-xl">📦</span>
+            <span class="text-[9px] font-bold uppercase mt-1">Stash</span>
         </button>
-        <button onclick="showTab('shop')" id="nav-shop" class="flex-1 flex flex-col items-center py-2 text-gray-500 transition-all">
-            <span class="text-lg">💰</span>
-            <span class="text-[9px] font-bold mt-1 uppercase tracking-tighter">Shop</span>
+        <button onclick="switchTab('shop')" id="nav-shop" class="flex-1 flex flex-col items-center py-2 text-gray-500">
+            <span class="text-xl">💰</span>
+            <span class="text-[9px] font-bold uppercase mt-1">Shop</span>
         </button>
     </nav>
 
     <script>
-        // --- GAME STATE ---
+        // --- ORIGINAL GAME LOGIC ---
         let bits = 0;
         let luck = 1.0;
-        let luckCost = 50;
+        let upgradeCost = 50;
         let inventory = [];
 
-        // --- DOM ELEMENTS ---
-        const bitsDisplay = document.getElementById('bits-count');
+        const bitsText = document.getElementById('bits');
+        const luckTag = document.getElementById('luck-tag');
         const invList = document.getElementById('inv-list');
-        const luckStat = document.getElementById('luck-stat');
-        const luckCostBtn = document.getElementById('luck-cost');
 
-        // --- CORE FUNCTIONS ---
-        document.getElementById('cookie-main').onclick = () => {
+        // Click Logic
+        document.getElementById('main-cookie').onclick = () => {
             bits += 1;
-            updateUI();
+            updateDisplay();
         };
 
-        document.getElementById('btn-roll').onclick = () => {
+        // Roll Logic
+        document.getElementById('roll-button').onclick = () => {
             const roll = Math.random() / luck;
-            let result = { name: "Burnt Cookie", rarity: "Common", color: "#444" };
+            let cookie = { name: "Basic Cookie", rarity: "Common", color: "#8b4513" };
 
-            if (roll < 0.005) result = { name: "CHRONO COOKIE", rarity: "DIVINE", color: "#06b6d4" };
-            else if (roll < 0.05) result = { name: "Golden Chip", rarity: "Rare", color: "#fbbf24" };
-            else if (roll < 0.2) result = { name: "Sugar Frost", rarity: "Uncommon", color: "#fff" };
-            else result = { name: "Classic Cookie", rarity: "Common", color: "#8b4513" };
+            if (roll < 0.001) cookie = { name: "CHRONO COOKIE", rarity: "DIVINE", color: "#06b6d4" };
+            else if (roll < 0.02) cookie = { name: "Golden Crumb", rarity: "Rare", color: "#fbbf24" };
+            else if (roll < 0.1) cookie = { name: "Sugar Cookie", rarity: "Uncommon", color: "#ffffff" };
 
-            inventory.unshift(result);
-            alert(`ROLLED: ${result.name} (${result.rarity})`);
-            updateInventory();
+            inventory.unshift(cookie);
+            alert(`You found: ${cookie.name}!`);
+            renderInventory();
         };
 
-        function buyLuck() {
-            if (bits >= luckCost) {
-                bits -= luckCost;
+        // Shop Logic
+        window.buyUpgrade = () => {
+            if (bits >= upgradeCost) {
+                bits -= upgradeCost;
                 luck += 0.5;
-                luckCost = Math.floor(luckCost * 2.5);
-                updateUI();
+                upgradeCost = Math.floor(upgradeCost * 2.2);
+                updateDisplay();
+                document.getElementById('upgrade-cost').innerText = upgradeCost + " BITS";
             } else {
                 alert("Not enough bits!");
             }
-        }
+        };
 
-        // --- UI LOGIC ---
-        function showTab(tab) {
+        // Navigation
+        window.switchTab = (tab) => {
             ['roll', 'inv', 'shop'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`nav-${t}`).classList.remove('tab-active', 'text-amber-500');
-                document.getElementById(`nav-${t}`).classList.add('text-gray-500');
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('nav-' + t).classList.replace('text-amber-500', 'text-gray-500');
             });
-            document.getElementById(`view-${tab}`).classList.remove('hidden');
-            document.getElementById(`nav-${tab}`).classList.add('tab-active');
+            document.getElementById('tab-' + tab).classList.remove('hidden');
+            document.getElementById('nav-' + tab).classList.replace('text-gray-500', 'text-amber-500');
+        };
+
+        function updateDisplay() {
+            bitsText.innerText = Math.floor(bits);
+            luckTag.innerText = `LUCK: ${luck.toFixed(1)}x`;
         }
 
-        function updateUI() {
-            bitsDisplay.innerText = Math.floor(bits);
-            luckStat.innerText = `LUCK: ${luck.toFixed(1)}x`;
-            luckCostBtn.innerText = `${luckCost} Bits`;
-            document.getElementById('inv-count').innerText = `${inventory.length} Items`;
-        }
-
-        function updateInventory() {
+        function renderInventory() {
             invList.innerHTML = '';
             inventory.forEach(item => {
-                const el = document.createElement('div');
-                el.className = "bg-[#1a1a1a] p-4 rounded-xl border-l-4 animate-item flex justify-between items-center";
-                el.style.borderColor = item.color;
-                el.innerHTML = `
+                const div = document.createElement('div');
+                div.className = `bg-[#181818] p-4 rounded-xl border-l-4 rarity-card flex justify-between items-center ${item.rarity === 'DIVINE' ? 'divine-glow' : ''}`;
+                div.style.borderColor = item.color;
+                div.innerHTML = `
                     <span class="font-bold text-sm">${item.name}</span>
-                    <span class="text-[8px] font-black px-2 py-1 rounded bg-black/50" style="color:${item.color}">${item.rarity}</span>
+                    <span class="text-[8px] font-black uppercase px-2 py-1 rounded bg-black/40" style="color:${item.color}">${item.rarity}</span>
                 `;
-                invList.appendChild(el);
+                invList.appendChild(div);
             });
-            updateUI();
+            updateDisplay();
         }
     </script>
 </body>
